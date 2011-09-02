@@ -41,7 +41,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">com.rayo.jmeter.harness.RspecSamplerClient</stringProp>
+          <stringProp name="classname">com.tropo.jmeter.harness.RspecSamplerClient</stringProp>
         </JavaSampler>
         <hashTree/>
         <JavaConfig guiclass="JavaConfigGui" testclass="JavaConfig" testname="Java Request Defaults" enabled="true">
@@ -59,7 +59,7 @@
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="classname">com.rayo.jmeter.harness.RspecSamplerClient</stringProp>
+          <stringProp name="classname">com.tropo.jmeter.harness.RspecSamplerClient</stringProp>
         </JavaConfig>
         <hashTree/>
       </hashTree>
