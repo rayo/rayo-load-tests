@@ -4,11 +4,17 @@ from com.rayo.functional.load import LoadTest
  
 # An instance of this class is created for every thread.
 class TestRunner:
+    
+    i = 1
+    
+    def __init__(self):
+    	self.i = self.i + 1
+    	
     # This method is called for every run.
     def __call__(self):
 
 		loadTest = LoadTest()
-		test = Test(1, "Log method")
+		test = Test(self.i, "Log method")
 		wrapper = test.wrap(loadTest)
 
         # Per thread scripting goes here.
