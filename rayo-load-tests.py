@@ -18,7 +18,7 @@ class TestRunner:
 		wrapper = test.wrap(loadTest)
 
         # Per thread scripting goes here.
-		testResult = wrapper.loadTest()
+		testResult = wrapper.loadTest(self.i)
 		if testResult > 0:
 			grinder.statistics.success = 0
 
