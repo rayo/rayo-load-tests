@@ -10,10 +10,12 @@ from net.grinder.script.Grinder import grinder
 from net.grinder.script import Test
 from com.rayo.functional.load import LoadTest
 from java.lang import System
+from java.util.concurrent.locks import ReentrantLock
 
 # The totalNumberOfRuns variable is shared by all worker threads.
 totalNumberOfRuns = 0
 testNumber = 0
+rayolock = ReentrantLock()
  
 # An instance of the TestRunner class is created for each worker thread.
 class TestRunner:
@@ -24,19 +26,28 @@ class TestRunner:
  
     # The __init__ method is called once for each thread.
     def __init__(self):
-        global testNumber
-        testNumber += 1
+        self.barrier = grinder.barrier("initialization")
     
-        # There's an initialisationTime variable for each worker thread.
-        self.initialisationTime = System.currentTimeMillis()
-        self.loadTest = LoadTest()
-        self.loadTest.loadTest(testNumber)
+        global rayolock
+        rayolock.lock()
+        try:
+            global testNumber        
+            testNumber += 1
+    
+            # There's an initialisationTime variable for each worker thread.
+            self.initialisationTime = System.currentTimeMillis()
+            self.loadTest = LoadTest()
+            self.loadTest.loadTest(testNumber)
         
-        self.test = Test(testNumber, "Load Test")
-        self.wrapper = self.test.wrap(self.loadTest) 
+            self.test = Test(testNumber, "Load Test")
+            self.wrapper = self.test.wrap(self.loadTest) 
         
-        grinder.logger.output("New thread started at time %s" %
+            grinder.logger.output("New thread started at time %s" %
                               self.initialisationTime)
+        finally:
+            rayolock.unlock()
+        grinder.logger.output("Waiting for other threads to initialize")                  
+        self.barrier.await()
  
     # The __call__ method is called once for each test run performed by
     # a worker thread.
@@ -73,21 +84,4 @@ class TestRunner:
     # It is useful for closing resources (e.g. database connections)
     # that were created in __init__.
     def __del__(self):
-        grinder.logger.output("Thread shutting down")
-     
-# An instance of this class is created for every thread.
-# class TestRunner:
-#    
-#    i = 1
-#    
-#    def __init__(self):
-#    	self.i = self.i + 1
-#    	loadTest = LoadTest()
-#    	
-#    def __call__(self):
-#		test = Test(self.i, "Log method")
-#		wrapper = test.wrap(loadTest)
-#
-#		testResult = wrapper.loadTest(self.i)
-#		if testResult > 0:
-#			grinder.statistics.success = 0        
+        grinder.logger.output("Thread shutting down") 
