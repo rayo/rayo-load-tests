@@ -31,6 +31,10 @@ class TestRunner:
         self.initialisationTime = System.currentTimeMillis()
         self.loadTest = LoadTest()
         self.loadTest.loadTest(testNumber)
+        
+        self.test = Test(testNumber, "Load Test")
+        self.wrapper = self.test.wrap(self.loadTest) 
+        
         grinder.logger.output("New thread started at time %s" %
                               self.initialisationTime)
  
@@ -38,6 +42,11 @@ class TestRunner:
     # a worker thread.
     def __call__(self):
  
+        # Turn off automatic reporting for the current worker thread.
+        # Having done this, the script can modify or set the statistics
+        # before they are sent to the log and the console.
+        grinder.statistics.delayReports = 1    
+        
         # We really should synchronise this access to the shared
         # totalNumberOfRuns variable. See JMS receiver example for how
         # to use the Python Condition class.
@@ -50,7 +59,10 @@ class TestRunner:
             "runsForThread=%d, totalNumberOfRuns=%d, initialisationTime=%d" %
             (self.runsForThread, totalNumberOfRuns, self.initialisationTime))
  		
-        self.loadTest.testLoadScenario2()
+        try:
+            self.wrapper.testLoadScenario2()
+        except:
+            grinder.statistics.forLastTest.success = 0
  		
         # You can also vary behaviour based on thread ID.
         if grinder.threadNumber % 2 == 0:
